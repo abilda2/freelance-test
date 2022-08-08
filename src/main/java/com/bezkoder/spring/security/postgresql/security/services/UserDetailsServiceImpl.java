@@ -1,6 +1,7 @@
 package com.bezkoder.spring.security.postgresql.security.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +15,8 @@ import com.bezkoder.spring.security.postgresql.repository.UserRepository;
 public class UserDetailsServiceImpl implements UserDetailsService {
   @Autowired
   UserRepository userRepository;
+  @Autowired
+  AuthenticationManager authenticationManager;
 
   @Override
   @Transactional

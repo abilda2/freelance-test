@@ -1,15 +1,24 @@
 package com.bezkoder.spring.security.postgresql.controllers;
 
+import com.bezkoder.spring.security.postgresql.models.ERole;
+import com.bezkoder.spring.security.postgresql.models.Role;
+import com.bezkoder.spring.security.postgresql.repository.RoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
+	@Autowired
+	RoleRepository roleRepository;
+
 	@GetMapping("/all")
 	public String allAccess() {
 		return "Public Content.";
@@ -31,5 +40,10 @@ public class TestController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public String adminAccess() {
 		return "Admin Board.";
+	}
+
+	@GetMapping("/GetAllRoles")
+	public List<Role> getAll() {
+		return roleRepository.findAll();
 	}
 }

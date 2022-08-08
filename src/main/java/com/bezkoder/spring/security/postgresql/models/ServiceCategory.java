@@ -2,11 +2,10 @@ package com.bezkoder.spring.security.postgresql.models;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "roles")
-public class ServiceCategories {
+@Table(name = "service_categories")
+public class ServiceCategory {
     public Long getId() {
         return id;
     }
@@ -30,8 +29,10 @@ public class ServiceCategories {
     @NotBlank
     private String name;
 
-    public ServiceCategories() {
+    public ServiceCategory() {
     }
-
+    public ServiceCategory(String name) {
+        this.name = name;
+    }
 
 }
