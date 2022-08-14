@@ -1,17 +1,19 @@
 package com.bezkoder.spring.security.postgresql.controllers;
 
-import com.bezkoder.spring.security.postgresql.models.Response;
-import com.bezkoder.spring.security.postgresql.models.Service;
-import com.bezkoder.spring.security.postgresql.models.ServiceCategory;
+import com.bezkoder.spring.security.postgresql.models.*;
+import com.bezkoder.spring.security.postgresql.payload.request.CreateServiceRequest;
 import com.bezkoder.spring.security.postgresql.repository.ServiceCategoryRepository;
 import com.bezkoder.spring.security.postgresql.repository.ServiceRepository;
+import com.bezkoder.spring.security.postgresql.repository.UserRepository;
+import com.bezkoder.spring.security.postgresql.services.FilesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +23,10 @@ import java.util.List;
 public class ServiceController {
     @Autowired
     ServiceRepository serviceRepository;
+    @Autowired
+    FilesService filesService;
+    @Autowired
+    UserRepository userRepository;
 
     @GetMapping("/all")
     public Response<List<Service>> allAccess() {
@@ -36,5 +42,26 @@ public class ServiceController {
         }
         return res;
     }
-
+    @PostMapping("/create")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public Response<CreateServiceRequest> create(@RequestBody CreateServiceRequest request) {
+        Response<CreateServiceRequest> response = new Response<>(null, true, "");
+        try {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
+            String username = userDetails.getUsername();
+            request.service.setUser_id(userRepository.findByUsername(username).get().getId());
+            Service s = createService(request.service);
+            filesService.LinkFilesWithService(request.serviceFileUrls, s.getId());
+            System.out.println("Recent id is - " + s.getId() + " id of user - " + s.getUser_id());
+        } catch (Exception e) {
+            response.success = false;
+            response.info = e.getMessage();
+        }
+        return response;
+    }
+    private Service createService(Service service) {
+        serviceRepository.save(service);
+        return service;
+    }
 }
